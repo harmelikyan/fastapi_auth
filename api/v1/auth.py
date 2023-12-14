@@ -2,9 +2,9 @@ from datetime import datetime, timedelta
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
-from api.v1.schemas.pydantic_schemas import Token, TokenData, User
+from schemas.pydantic_schemas import Token, TokenData, User
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sql_db.models import UserInDB, fake_users_db
+from db.models import User as UserModel
 from fastapi import APIRouter
 from passlib.context import CryptContext
 from jose import JWTError, jwt
@@ -32,7 +32,7 @@ def get_password_hash(password):
 def get_user(db, username: str):
     if username in db:
         user_dict = db[username]
-        return UserInDB(**user_dict)
+        return User(**user_dict)
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
@@ -55,9 +55,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     return user
 
 
-async def get_current_active_user(
-    current_user: Annotated[User, Depends(get_current_user)]
-):
+async def get_current_active_user(current_user: Annotated[User, Depends(get_current_user)]):
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
@@ -94,10 +92,8 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-@router.post("/token", response_model=Token)
-async def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-):
+@router.post("/login", response_model=Token)
+async def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     user = authenticate_user(fake_users_db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -106,7 +102,5 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
+    access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}

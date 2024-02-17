@@ -73,6 +73,8 @@ def get_db():
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
     db = SessionLocal()
+    print("Succesfully connected to Database")
+
     try:
         yield db
     finally:

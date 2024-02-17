@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class User(BaseModel):
@@ -48,7 +48,9 @@ class UserCreate(UserBase):
 
 class DBUser(UserBase):
     id: int
-    # is_active: bool
+    email: EmailStr
+    hashed_password: str
+
     items: list[Item] = []
 
     class Config:

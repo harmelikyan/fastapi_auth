@@ -51,6 +51,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
+    admin = Column(Boolean, default=0)
     hashed_password = Column(String, default=True)
     items = relationship("Item", back_populates="owner")
 
@@ -66,10 +67,8 @@ class Item(Base):
     owner = relationship("User", back_populates="items")
 
 
-Base.metadata.create_all(engine)
-
-
 def get_db():
+    Base.metadata.create_all(engine)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
     db = SessionLocal()

@@ -41,13 +41,13 @@ async def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
-    access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": str(user.id)}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.get("/info", response_model=pydantic_schemas.DBUser)
-async def read_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
-    db_user = await user_crud.check_user_token(token, db)
+async def read_user(user_id: int, token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
+    db_user = await user_crud.check_user_token(token, db, user_id)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user

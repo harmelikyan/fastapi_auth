@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from pydantic import BaseModel, EmailStr
 
 
@@ -18,7 +19,7 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: str | None = None
+    user_id: int
 
 
 class ItemBase(BaseModel):
@@ -40,6 +41,7 @@ class Item(ItemBase):
 
 class UserBase(BaseModel):
     email: str
+    admin: bool
 
 
 class UserCreate(UserBase):

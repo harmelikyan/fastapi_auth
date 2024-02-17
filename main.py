@@ -7,6 +7,8 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 from db.models import get_db
 
+# get_db()
+
 # connection = create_connection("postgres", "postgres", "abc123", "127.0.0.1", "5432")
 app = FastAPI()
 
@@ -15,5 +17,4 @@ app.include_router(router=endpoints.router, prefix="/api/v1")
 
 Instrumentator().instrument(app).expose(app)
 if __name__ == "__main__":
-    get_db()
     uvicorn.run(app, host="0.0.0.0", port=8000)
